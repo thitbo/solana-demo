@@ -71,7 +71,7 @@ const HomeScreen = () => {
 
     setDecryptedKey(decryptedSecretKey)
 
-    if(!decryptedSecretKey){
+    if(getLength(decryptedSecretKey) === 0){
       console.log('cannot detect your wallet');
     }
 
@@ -281,14 +281,14 @@ const HomeScreen = () => {
       </div>
 
       <div className='mt-3'>
-        <div className='d-flex'>
+        <div className='d-flex align-items-center'>
           <Button onClick={viewOnwerTokens}>
             { getLength(listTokenAccount) > 0
               ? 'Refresh List Accounts'
               : 'Show Token Accounts'
             }
           </Button>
-          {isLoadingListToken && <Spinner size='sm' animation="border"/>}
+          {isLoadingListToken && <Spinner className={styles.ml_3} animation="border"/>}
         </div>
        
         <div className={styles['token-wrapper']}>
