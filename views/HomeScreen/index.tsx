@@ -21,6 +21,8 @@ import { AccountLayout, AuthorityType, createMint, createSetAuthorityInstruction
 
 const HomeScreen = () => {
 
+  const [isLoadingListToken, setIsLoadingListToken] = useState(false)
+
   const [isTransfering, setIsTransfering] = useState(false)
   const [activeWallet, setActiveWallet] = useState()
   const [receiveWalletAddress, setReceiveWalletAddress] = useState()
@@ -76,6 +78,8 @@ const HomeScreen = () => {
   }
 
   const viewOnwerTokens = async () => {
+    setIsLoadingListToken(true)
+
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
     const tokenAccounts = await connection.getTokenAccountsByOwner(
       new PublicKey(get(activeWallet, 'address')),
@@ -104,6 +108,9 @@ const HomeScreen = () => {
     } )) 
 
     setListTokenAccount(listTokenBalance)
+
+    setIsLoadingListToken(false)
+
     
   }
   
@@ -274,12 +281,16 @@ const HomeScreen = () => {
       </div>
 
       <div className='mt-3'>
-        <Button onClick={viewOnwerTokens}>
-          { getLength(listTokenAccount) > 0
-            ? 'Refresh List Accounts'
-            : 'Show Token Accounts'
-          }
-        </Button>
+        <div className='d-flex'>
+          <Button onClick={viewOnwerTokens}>
+            { getLength(listTokenAccount) > 0
+              ? 'Refresh List Accounts'
+              : 'Show Token Accounts'
+            }
+          </Button>
+          {isLoadingListToken && <Spinner size='sm' animation="border"/>}
+        </div>
+       
         <div className={styles['token-wrapper']}>
           {listTokenAccount.map((item, index) => {
             return (
