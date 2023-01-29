@@ -65,13 +65,14 @@ const HomeScreen = () => {
 
     // get wallet decryptedSecretKey
     const uuid = getOrCreateUUID();
+    const deviceId = getOrCreateUUID();
 
     console.log('uuid', uuid);
     
     const decryptedSecretKey = await decryptData({
       data: get(solWallet, 'privateKey'),
       uuid: uuid,
-      deviceId: uuid,
+      deviceId: deviceId,
     });
 
     console.log('decryptedSecretKey', decryptedSecretKey);
