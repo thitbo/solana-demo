@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Form, InputGroup, Spinner } from 'react-bootstrap';
 import { formatAddress, decryptData, getOrCreateUUID, getCookie, convertBalanceToWei, convertWeiToBalance, getLength } from '@/common/functions';
 import {get} from 'lodash';
-import { KEY_STORE, NFT_CHAIN_DATA } from '@/common/constants';
+import {NFT_CHAIN_DATA } from '@/common/constants';
 import base58 from 'bs58';
 import styles from './style.module.scss'
 import cn from 'classnames'
@@ -255,15 +255,21 @@ const HomeScreen = () => {
     }
 
   }
+  const isConnectedWallet = !!get(activeWallet, 'address')
 
   
   return (
     <div>
       <div className='d-flex justify-content-between align-items-center'>
-        <div className='text-warning'> * Coin98 Extension is Required for this Demo</div>
+        <div className='text-warning'> * Coin98 Wallet is Required for this Demo</div>
         <div>
-          <span >Wallet Active: </span>
-          <Badge bg="success">{formatAddress(get(activeWallet, 'address', 'non wallet'), 10)}</Badge>
+          <Badge bg={isConnectedWallet ? "success" : 'danger'}>
+          {
+            isConnectedWallet 
+             ? formatAddress(get(activeWallet, 'address', 'null'), 10)
+             : 'Coin98 Wallet not Found'
+          }
+          </Badge>
         </div>
       </div>
 

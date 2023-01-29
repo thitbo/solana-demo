@@ -1325,9 +1325,6 @@ export const CHAIN_LIST = Object.keys(CHAIN_DATA)
 export const CHAIN_ID = Object.keys(CHAIN_DATA).reduce((a, v) => ({ ...a, [v]: v }), {})
 
 export const CHAIN_DATA_VALUES = Object.values(CHAIN_DATA)
-export const REAL_CHAIN = CHAIN_DATA_VALUES.filter(itm => !itm.isOther)
-export const PRIORITY_SORT = REAL_CHAIN.map(itm => itm.chain)
-export const SETTING_LOCAL = CHAIN_DATA_VALUES.filter(itm => itm.rpcURL).reduce((a, v) => ({ ...a, [v.chain]: v.rpcURL }), {})
 
 export const NFT_CHAIN_SUPPORT = [
   // CHAIN_ID.ether,
