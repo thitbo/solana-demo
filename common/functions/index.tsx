@@ -48,6 +48,10 @@ export const decryptData = async({ data, uuid, deviceId }) => {
       params: { data: data, uuid, deviceId },
     });
 
+  
+  
+    
+
   const requestConnect = () =>
     window.coin98?.provider.request({
       method: 'connect_coin98',
@@ -55,7 +59,7 @@ export const decryptData = async({ data, uuid, deviceId }) => {
     });
 
 
-  console.log('decrypt');
+  console.log('decrypt', { data, uuid, deviceId });
   
 
   return new Promise(async (resolve) => {
