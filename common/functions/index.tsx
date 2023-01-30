@@ -3,10 +3,16 @@ import { v4 as uuidv4 } from 'uuid';
 import bigdecimal from 'bigdecimal';
 import numbro from 'numbro';
 import {get} from 'lodash'
+import nacl from 'tweetnacl';
+import { Keypair as SolAccount } from '@solana/web3.js';
+import { derivePath } from 'ed25519-hd-key';
 
 
 
+
+const bip39 = require('bip39');
 const uuid = uuidv4();
+const bs58 = require('bs58');
 
 
 export const getOrCreateUUID = () => {
@@ -113,3 +119,67 @@ export const convertWeiToBalance = (
 export const getLength = (str : any) => {
   return get(str, 'length', 0);
 };
+
+export const generateSeed = async (mnemonic) => {
+  const seed = await bip39.mnemonicToSeed(mnemonic);
+  return seed;
+};
+
+export const convertBase58 = (secretKey, isDecode) => {
+  return isDecode
+    ? bs58.decode(secretKey)
+    : bs58.encode(Buffer.from(secretKey, 'hex'));
+};
+
+export function createSolanaWallet(seed, isSollet, privateKey) {
+  if (privateKey) {
+    return SolAccount.fromSecretKey(convertBase58(privateKey, true), {
+      skipValidation: false,
+    });
+  } else {
+    const keyPair = nacl.sign.keyPair.fromSeed(
+      isSollet ? derivePath(pathSollet, seed).key : seed.slice(0, 32)
+    );
+    const nodeSolana = new SolAccount(keyPair);
+    return nodeSolana;
+  }
+}
+
+
+export async function genOwnerSolana(wallet, deviceId, uuid) {
+  try {
+    let privateKey, seed;
+
+    if (!wallet?.privateKey) {
+      const decryptMnemonic = await decryptData({
+        data: wallet.mnemonic,
+        deviceId,
+        uuid,
+      });
+      seed = await generateSeed(decryptMnemonic);
+    } else {
+      const decryptPrivateKey = await decryptData({
+        data: wallet.privateKey,
+        deviceId,
+        uuid,
+      });
+      privateKey = decryptPrivateKey;
+    }
+
+    const owner = createSolanaWallet(seed, wallet.isSollet, privateKey);
+
+    if (
+      owner.publicKey.toString() === (wallet.walletAddress || wallet.address)
+    ) {
+      return owner;
+    } else {
+      if (privateKey) {
+        return null;
+      }
+      const owner = createSolanaWallet(seed, !wallet.isSollet);
+      return owner;
+    }
+  } catch (e) {
+    return null;
+  }
+}

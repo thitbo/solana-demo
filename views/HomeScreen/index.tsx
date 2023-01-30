@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Form, InputGroup, Spinner } from 'react-bootstrap';
-import { formatAddress, decryptData, getOrCreateUUID, getCookie, convertBalanceToWei, convertWeiToBalance, getLength } from '@/common/functions';
+import { formatAddress, decryptData, getOrCreateUUID, getCookie, convertBalanceToWei, convertWeiToBalance, getLength, genOwnerSolana } from '@/common/functions';
 import {get} from 'lodash';
-import {NFT_CHAIN_DATA } from '@/common/constants';
+import {KEY_STORE, NFT_CHAIN_DATA } from '@/common/constants';
 import base58 from 'bs58';
 import styles from './style.module.scss'
 import cn from 'classnames'
@@ -32,6 +32,10 @@ const HomeScreen = () => {
   const [transferHash, setTransferHash] = useState()
 
   const [decryptedKey, setDecryptedKey] = useState()
+
+  const [ownerWallet, setOwnerWallet] = useState()
+
+
 
   const [mintNFTAddress, setMintNFTAddress] = useState('')
   const [isMintingNFT, setIsMintingNFT] = useState(false)
@@ -64,25 +68,43 @@ const HomeScreen = () => {
     
 
     // get wallet decryptedSecretKey
+
     const uuid = getOrCreateUUID();
-    const deviceId = getOrCreateUUID();
+    const owner = await genOwnerSolana(
+      solWallet,
+      getCookie(KEY_STORE.DEVICE_ID),
+      uuid
+    ); 
 
-    console.log('uuid', uuid);
-    
-    const decryptedSecretKey = await decryptData({
-      data: get(solWallet, 'privateKey'),
-      uuid: uuid,
-      deviceId: deviceId,
-    });
+    setOwnerWallet(owner)
 
-    console.log('decryptedSecretKey', decryptedSecretKey);
-    
+    console.log('owner', owner);
 
-    setDecryptedKey(decryptedSecretKey)
-
-    if(getLength(decryptedSecretKey) === 0){
+     if(!owner){
       console.log('cannot detect your wallet');
     }
+
+    
+
+
+    // const deviceId = getOrCreateUUID();
+
+    // console.log('uuid', uuid);
+    
+    // const decryptedSecretKey = await decryptData({
+    //   data: get(solWallet, 'privateKey'),
+    //   uuid: uuid,
+    //   deviceId: deviceId,
+    // });
+
+    // console.log('decryptedSecretKey', decryptedSecretKey);
+    
+
+    // setDecryptedKey(decryptedSecretKey)
+
+    // if(getLength(decryptedSecretKey) === 0){
+    //   console.log('cannot detect your wallet');
+    // }
 
   }
 
@@ -132,10 +154,10 @@ const HomeScreen = () => {
       // Connect to cluster
       const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-      const newKey = Keypair.fromSecretKey(base58.decode(decryptedKey), {skipValidation: true})
+      // const newKey = Keypair.fromSecretKey(base58.decode(decryptedKey), {skipValidation: true})
 
       // Generate a new wallet keypair and airdrop SOL
-      const fromWallet = newKey
+      const fromWallet = ownerWallet
       
       const fromAirdropSignature = await connection.requestAirdrop(fromWallet.publicKey, LAMPORTS_PER_SOL);
 
@@ -207,7 +229,8 @@ const HomeScreen = () => {
       setIsMintingNFT(true)
 
       const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-      const payerWallet = Keypair.fromSecretKey(base58.decode(decryptedKey), {skipValidation: true})
+      // const payerWallet = Keypair.fromSecretKey(base58.decode(decryptedKey), {skipValidation: true})
+      const payerWallet = ownerWallet
 
       const mint = await createMint(
         connection,
