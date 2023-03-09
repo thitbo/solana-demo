@@ -6,6 +6,7 @@ import {get} from 'lodash'
 import nacl from 'tweetnacl';
 import { Keypair as SolAccount } from '@solana/web3.js';
 import { derivePath } from 'ed25519-hd-key';
+import { ethers } from 'ethers';
 
 
 
@@ -182,4 +183,8 @@ export async function genOwnerSolana(wallet, deviceId, uuid) {
   } catch (e) {
     return null;
   }
+}
+
+export function stringifiableToHex(value) {
+  return ethers.utils.hexlify(Buffer.from(JSON.stringify(value)));
 }
